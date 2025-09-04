@@ -30,6 +30,7 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
         category.setName(categoryDetails.getName());
+        category.setImageUrl(categoryDetails.getImageUrl()); // Добавлено обновление imageUrl
         return categoryRepository.save(category);
     }
 

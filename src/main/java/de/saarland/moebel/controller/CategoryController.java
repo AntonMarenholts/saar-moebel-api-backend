@@ -17,11 +17,13 @@ public class CategoryController {
     @Autowired
     private CategoryService categoryService;
 
+    // Этот эндпоинт остается публичным - все могут видеть категории
     @GetMapping
     public List<Category> getAllCategories() {
         return categoryService.getAllCategories();
     }
 
+    // Этот эндпоинт тоже публичный
     @GetMapping("/{id}")
     public ResponseEntity<Category> getCategoryById(@PathVariable Long id) {
         Category category = categoryService.getCategoryById(id)
@@ -29,12 +31,14 @@ public class CategoryController {
         return ResponseEntity.ok(category);
     }
 
+    // А вот этот эндпоинт теперь только для администратора
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
     public Category createCategory(@RequestBody Category category) {
         return categoryService.createCategory(category);
     }
 
+    // И этот только для администратора
     @PutMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Category> updateCategory(@PathVariable Long id, @RequestBody Category categoryDetails) {
@@ -42,6 +46,7 @@ public class CategoryController {
         return ResponseEntity.ok(updatedCategory);
     }
 
+    // И этот тоже
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCategory(@PathVariable Long id) {
