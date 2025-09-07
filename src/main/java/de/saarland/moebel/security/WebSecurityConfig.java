@@ -58,13 +58,7 @@ public class WebSecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // -- Удаляем бин PasswordEncoder отсюда --
-    /*
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
-    }
-    */
+
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
@@ -91,6 +85,7 @@ public class WebSecurityConfig {
                         .requestMatchers("/api/auth/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
                         .requestMatchers("/api/categories/**").permitAll()
+                        .requestMatchers("/api/upload/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
