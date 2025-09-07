@@ -24,8 +24,8 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
 
-    @Value("${app.oauth2.redirectUri}")
-    private String redirectUri;
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
 
     public OAuth2LoginSuccessHandler(UserRepository userRepository, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
@@ -57,6 +57,6 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String jwt = jwtUtils.generateTokenFromUsername(user.getUsername());
 
 
-        response.sendRedirect(redirectUri + "?token=" + jwt);
+        response.sendRedirect(frontendUrl + "/oauth2/redirect?token=" + jwt);
     }
 }

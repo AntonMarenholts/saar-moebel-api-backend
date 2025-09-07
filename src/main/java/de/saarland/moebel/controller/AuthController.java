@@ -19,6 +19,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.ZonedDateTime;
@@ -39,6 +40,9 @@ public class AuthController {
     private final JwtUtils jwtUtils;
     private final EmailService emailService;
 
+    @Value("${app.frontend.url}")
+    private String frontendUrl;
+
     public AuthController(AuthenticationManager authenticationManager, UserRepository userRepository, PasswordEncoder encoder, JwtUtils jwtUtils, EmailService emailService, RecaptchaService recaptchaService) {
         this.authenticationManager = authenticationManager;
         this.userRepository = userRepository;
@@ -51,9 +55,6 @@ public class AuthController {
     @PostMapping("/signin")
     @RateLimiter(name = "loginLimiter")
     public ResponseEntity<?> authenticateUser(@Valid @RequestBody LoginRequest loginRequest) {
-        // Логика reCAPTCHA может быть добавлена позже, если потребуется
-        // if (!recaptchaService.verify(loginRequest.getRecaptchaToken())) { ... }
-
         Authentication authentication = authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(loginRequest.getUsername(), loginRequest.getPassword()));
 
@@ -74,8 +75,6 @@ public class AuthController {
 
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@Valid @RequestBody SignupRequest signUpRequest) {
-        // if (!recaptchaService.verify(signUpRequest.getRecaptchaToken())) { ... }
-
         if (userRepository.existsByUsername(signUpRequest.getUsername())) {
             return ResponseEntity.badRequest().body(new MessageResponse("Error: Username is already taken!"));
         }
@@ -92,6 +91,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
+    // ++ НАЧАЛО ИЗМЕНЕНИЙ: Добавляем два новых эндпоинта ++
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -104,10 +104,12 @@ public class AuthController {
             user.setTokenCreationDate(ZonedDateTime.now());
             userRepository.save(user);
 
-            String resetLink = "https://saar-moebel-api-frontend-gx14s0f83-antonmarenholts-projects.vercel.app/reset-password?token=" + token;
+            // Ссылка будет вести на фронтенд, где мы создадим страницу для сброса
+            String resetLink = frontendUrl + "/reset-password?token=" + token;
             emailService.sendPasswordResetEmail(user, resetLink);
         }
 
+        // Мы всегда возвращаем один и тот же ответ, чтобы не раскрывать, есть ли email в базе
         return ResponseEntity.ok(new MessageResponse("If your email is in our system, you will receive a password reset link."));
     }
 
@@ -125,6 +127,7 @@ public class AuthController {
 
         User user = userOptional.get();
 
+        // Проверяем, что токен не истек (например, 24 часа)
         if (user.getTokenCreationDate() != null && user.getTokenCreationDate().plusHours(24).isBefore(ZonedDateTime.now())) {
             user.setResetPasswordToken(null);
             user.setTokenCreationDate(null);
@@ -139,4 +142,5 @@ public class AuthController {
 
         return ResponseEntity.ok(new MessageResponse("Password has been reset successfully."));
     }
+
 }
