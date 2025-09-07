@@ -28,17 +28,19 @@ public class EmailService {
         this.sendGrid = new SendGrid(sendGridApiKey);
     }
 
+    // ++ НАЧАЛО ИЗМЕНЕНИЙ: Добавляем новый метод ++
     public void sendPasswordResetEmail(User user, String resetLink) {
         String subject = "Password Reset Request for Saar Möbel";
         String textContent = String.format(
-                "Hello, %s!\n\nYou requested a password reset. Please click the link below to set a new password:\n%s\n\n" +
-                        "If you did not request this, please ignore this email.\n\n" +
+                "Hello, %s!\\n\\nYou requested a password reset. Please click the link below to set a new password:\\n%s\\n\\n" +
+                        "If you did not request this, please ignore this email.\\n\\n" +
                         "Best wishes, the Saar Möbel team!",
                 user.getUsername(),
                 resetLink
         );
         sendEmail(user.getEmail(), subject, textContent);
     }
+    // -- КОНЕЦ ИЗМЕНЕНИЙ --
 
     private void sendEmail(String toEmail, String subject, String textContent) {
         Email from = new Email(fromEmail);
