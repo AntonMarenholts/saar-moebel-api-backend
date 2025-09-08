@@ -91,7 +91,7 @@ public class AuthController {
         return ResponseEntity.ok(new MessageResponse("User registered successfully!"));
     }
 
-    // ++ НАЧАЛО ИЗМЕНЕНИЙ: Добавляем два новых эндпоинта ++
+
     @PostMapping("/forgot-password")
     public ResponseEntity<?> forgotPassword(@RequestBody Map<String, String> request) {
         String email = request.get("email");
@@ -104,12 +104,12 @@ public class AuthController {
             user.setTokenCreationDate(ZonedDateTime.now());
             userRepository.save(user);
 
-            // Ссылка будет вести на фронтенд, где мы создадим страницу для сброса
+
             String resetLink = frontendUrl + "/reset-password?token=" + token;
             emailService.sendPasswordResetEmail(user, resetLink);
         }
 
-        // Мы всегда возвращаем один и тот же ответ, чтобы не раскрывать, есть ли email в базе
+
         return ResponseEntity.ok(new MessageResponse("If your email is in our system, you will receive a password reset link."));
     }
 
@@ -127,7 +127,7 @@ public class AuthController {
 
         User user = userOptional.get();
 
-        // Проверяем, что токен не истек (например, 24 часа)
+
         if (user.getTokenCreationDate() != null && user.getTokenCreationDate().plusHours(24).isBefore(ZonedDateTime.now())) {
             user.setResetPasswordToken(null);
             user.setTokenCreationDate(null);

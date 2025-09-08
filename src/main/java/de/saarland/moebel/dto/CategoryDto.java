@@ -15,6 +15,6 @@ public class CategoryDto {
     @NotBlank(message = "Category slug cannot be blank")
     private String slug;
 
-    // ++ ИЗМЕНЕНИЕ: Добавляем поле ++
+
     private String imageUrl;
 }

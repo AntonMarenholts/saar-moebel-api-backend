@@ -21,7 +21,7 @@ public class Product {
     @Column(nullable = false)
     private String name;
 
-    @Column(length = 1024) // Увеличим поле для описания
+    @Column(length = 1024)
     private String description;
 
     @Column(nullable = false)

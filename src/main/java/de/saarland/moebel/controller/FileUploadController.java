@@ -35,35 +35,34 @@ public class FileUploadController {
         }
 
         String bucketName = "product-images";
-        // Генерируем уникальное имя файла, чтобы избежать конфликтов
         String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
         String uploadPath = "/storage/v1/object/" + bucketName + "/" + fileName;
         String fullUrl = supabaseUrl + uploadPath;
 
-        // Создаем заголовки для запроса к Supabase
+
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + serviceKey);
         headers.setContentType(MediaType.parseMediaType(file.getContentType()));
-        // Supabase также требует заголовок apikey для доступа к хранилищу
+
         headers.set("apikey", serviceKey);
 
         try {
             HttpEntity<byte[]> requestEntity = new HttpEntity<>(file.getBytes(), headers);
 
-            // Отправляем файл в Supabase
+
             ResponseEntity<String> response = restTemplate.exchange(fullUrl, HttpMethod.POST, requestEntity, String.class);
 
             if (response.getStatusCode().is2xxSuccessful()) {
                 String publicUrl = supabaseUrl + uploadPath;
                 return ResponseEntity.ok(Map.of("imageUrl", publicUrl));
             } else {
-                // Если Supabase вернул ошибку, транслируем ее клиенту
+
                 return ResponseEntity.status(response.getStatusCode()).body(Map.of("error", "Supabase error: " + response.getBody()));
             }
         } catch (IOException e) {
             return ResponseEntity.internalServerError().body(Map.of("error", "Could not read file bytes: " + e.getMessage()));
         } catch (Exception e) {
-            // Логируем ошибку на сервере для отладки
+
             e.printStackTrace();
             return ResponseEntity.internalServerError().body(Map.of("error", "Error uploading file: " + e.getMessage()));
         }

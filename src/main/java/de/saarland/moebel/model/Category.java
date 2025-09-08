@@ -22,7 +22,7 @@ public class Category {
     @Column(nullable = false, unique = true)
     private String slug;
 
-    // ++ ИЗМЕНЕНИЕ: Добавляем поле для URL изображения ++
+
     private String imageUrl;
 
     public Category(String name, String slug) {
