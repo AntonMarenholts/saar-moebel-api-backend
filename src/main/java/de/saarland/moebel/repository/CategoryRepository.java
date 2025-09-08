@@ -8,6 +8,12 @@ import java.util.Optional;
 
 @Repository
 public interface CategoryRepository extends JpaRepository<Category, Long> {
-    // Метод для поиска категории по ее "slug" (короткому имени для URL)
+
     Optional<Category> findBySlug(String slug);
+
+    Optional<Category> findByName(String name);
+
+    Optional<Category> findByNameAndIdNot(String name, Long id);
+
+    Optional<Category> findBySlugAndIdNot(String slug, Long id);
 }

@@ -7,6 +7,7 @@ import com.sendgrid.SendGrid;
 import com.sendgrid.helpers.mail.Mail;
 import com.sendgrid.helpers.mail.objects.Content;
 import com.sendgrid.helpers.mail.objects.Email;
+import de.saarland.moebel.exception.EmailSendingException;
 import de.saarland.moebel.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,6 @@ public class EmailService {
         this.sendGrid = new SendGrid(sendGridApiKey);
     }
 
-    // ++ НАЧАЛО ИЗМЕНЕНИЙ: Добавляем новый метод ++
     public void sendPasswordResetEmail(User user, String resetLink) {
         String subject = "Password Reset Request for Saar Möbel";
         String textContent = String.format(
@@ -40,13 +40,13 @@ public class EmailService {
         );
         sendEmail(user.getEmail(), subject, textContent);
     }
-    // -- КОНЕЦ ИЗМЕНЕНИЙ --
 
     private void sendEmail(String toEmail, String subject, String textContent) {
         Email from = new Email(fromEmail);
         Email to = new Email(toEmail);
         Content content = new Content("text/plain", textContent);
         Mail mail = new Mail(from, subject, to, content);
+
         Request request = new Request();
         try {
             request.setMethod(Method.POST);
@@ -54,10 +54,22 @@ public class EmailService {
             request.setBody(mail.build());
 
             Response response = sendGrid.api(request);
+
+
+            if (response.getStatusCode() < 200 || response.getStatusCode() >= 300) {
+
+                logger.error("Failed to send email to {}. SendGrid responded with status {} and body: {}",
+                        toEmail, response.getStatusCode(), response.getBody());
+                throw new IOException("SendGrid API error: " + response.getBody());
+            }
+
             logger.info("Email sent to {}. Subject: '{}'. Status code: {}", toEmail, subject, response.getStatusCode());
+
         } catch (IOException ex) {
-            logger.error("Error sending email to {}: {}", toEmail, ex.getMessage());
-            // В реальном приложении здесь может быть более сложная обработка ошибок
+
+            logger.error("IOException while trying to send email to {}", toEmail, ex);
+
+            throw new EmailSendingException("Failed to send email to " + toEmail, ex);
         }
     }
 }

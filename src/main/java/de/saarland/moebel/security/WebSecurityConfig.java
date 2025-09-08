@@ -31,25 +31,25 @@ public class WebSecurityConfig {
     private final AuthEntryPointJwt unauthorizedHandler;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final AuthTokenFilter authTokenFilter;
-    private final PasswordEncoder passwordEncoder; // ++ Внедряем PasswordEncoder
+    private final PasswordEncoder passwordEncoder;
 
     public WebSecurityConfig(UserDetailsService userDetailsService,
                              AuthEntryPointJwt unauthorizedHandler,
                              OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
                              AuthTokenFilter authTokenFilter,
-                             PasswordEncoder passwordEncoder) { // ++ Внедряем PasswordEncoder
+                             PasswordEncoder passwordEncoder) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
         this.authTokenFilter = authTokenFilter;
-        this.passwordEncoder = passwordEncoder; // ++ Внедряем PasswordEncoder
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Bean
     public DaoAuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider();
         authProvider.setUserDetailsService(userDetailsService);
-        authProvider.setPasswordEncoder(passwordEncoder); // Используем внедренный бин
+        authProvider.setPasswordEncoder(passwordEncoder);
         return authProvider;
     }
 

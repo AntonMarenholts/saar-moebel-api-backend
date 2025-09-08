@@ -7,7 +7,7 @@ import jakarta.validation.constraints.Size;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.time.ZonedDateTime; // <-- Новый импорт
+import java.time.ZonedDateTime;
 
 @Entity
 @Table(name = "users")
@@ -39,10 +39,10 @@ public class User {
     @Column(length = 20)
     private ERole role;
 
-    // ++ НАЧАЛО ИЗМЕНЕНИЙ: Добавляем новые поля ++
+
     private String resetPasswordToken;
     private ZonedDateTime tokenCreationDate;
-    // -- КОНЕЦ ИЗМЕНЕНИЙ --
+
 
     public User(String username, String email, String password) {
         this.username = username;

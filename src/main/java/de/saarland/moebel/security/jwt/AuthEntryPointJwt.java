@@ -1,6 +1,6 @@
 package de.saarland.moebel.security.jwt;
 
-// ... (импорты из проекта Events)
+
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

@@ -13,6 +13,6 @@ public class LoginRequest {
     @NotBlank
     private String password;
 
-    // Для reCAPTCHA, как в проекте Events
+
     private String recaptchaToken;
 }

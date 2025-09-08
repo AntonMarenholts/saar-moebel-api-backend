@@ -1,7 +1,9 @@
 package de.saarland.moebel.service;
 
+import de.saarland.moebel.exception.ResourceConflictException;
 import de.saarland.moebel.model.Category;
 import de.saarland.moebel.repository.CategoryRepository;
+import de.saarland.moebel.repository.ProductRepository;
 import jakarta.persistence.EntityNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -10,14 +12,24 @@ import org.springframework.transaction.annotation.Transactional;
 public class CategoryService {
 
     private final CategoryRepository categoryRepository;
+    private final ProductRepository productRepository;
 
-    public CategoryService(CategoryRepository categoryRepository) {
+
+    public CategoryService(CategoryRepository categoryRepository, ProductRepository productRepository) {
         this.categoryRepository = categoryRepository;
+        this.productRepository = productRepository;
     }
 
     @Transactional
     public Category createCategory(Category category) {
-        // Здесь можно добавить проверки, например, на уникальность имени или slug
+
+        categoryRepository.findByName(category.getName()).ifPresent(c -> {
+            throw new ResourceConflictException("Category with name '" + c.getName() + "' already exists.");
+        });
+        categoryRepository.findBySlug(category.getSlug()).ifPresent(c -> {
+            throw new ResourceConflictException("Category with slug '" + c.getSlug() + "' already exists.");
+        });
+
         return categoryRepository.save(category);
     }
 
@@ -26,20 +38,36 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
 
+
+        categoryRepository.findByNameAndIdNot(categoryDetails.getName(), id).ifPresent(c -> {
+            throw new ResourceConflictException("Category with name '" + c.getName() + "' already exists.");
+        });
+
+        categoryRepository.findBySlugAndIdNot(categoryDetails.getSlug(), id).ifPresent(c -> {
+            throw new ResourceConflictException("Category with slug '" + c.getSlug() + "' already exists.");
+        });
+
         category.setName(categoryDetails.getName());
         category.setSlug(categoryDetails.getSlug());
+
 
         return categoryRepository.save(category);
     }
 
     @Transactional
     public void deleteCategory(Long id) {
-        // Здесь можно добавить проверку, есть ли товары в этой категории, прежде чем удалять
         if (!categoryRepository.existsById(id)) {
             throw new EntityNotFoundException("Category not found with id: " + id);
         }
+
+
+        if (productRepository.existsByCategoryId(id)) {
+            throw new ResourceConflictException("Cannot delete category with id '" + id + "' because it contains products.");
+        }
+
         categoryRepository.deleteById(id);
     }
+
     @Transactional
     public Category updateCategoryImage(Long id, String imageUrl) {
         Category category = categoryRepository.findById(id)

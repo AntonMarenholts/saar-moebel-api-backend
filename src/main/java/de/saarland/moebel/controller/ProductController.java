@@ -26,29 +26,29 @@ public class ProductController {
         this.categoryRepository = categoryRepository;
     }
 
-    // Эндпоинт для получения всех товаров
+
     @GetMapping("/products")
     public ResponseEntity<List<Product>> getAllProducts() {
         List<Product> products = productRepository.findAll();
         return ResponseEntity.ok(products);
     }
 
-    // Эндпоинт для получения всех категорий
+
     @GetMapping("/categories")
     public ResponseEntity<List<Category>> getAllCategories() {
         List<Category> categories = categoryRepository.findAll();
         return ResponseEntity.ok(categories);
     }
 
-    // ++ НАЧАЛО ИЗМЕНЕНИЙ: Добавляем эндпоинт для создания товара ++
+
     @PostMapping("/products")
     @PreAuthorize("hasRole('ADMIN')") // <-- Только для админов
     public ResponseEntity<Product> createProduct(@Valid @RequestBody ProductRequest productRequest) {
-        // Находим категорию по ID, иначе выбрасываем ошибку
+
         Category category = categoryRepository.findById(productRequest.getCategoryId())
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + productRequest.getCategoryId()));
 
-        // Создаем новый объект Product на основе запроса
+
         Product newProduct = new Product(
                 productRequest.getName(),
                 productRequest.getDescription(),
@@ -57,11 +57,20 @@ public class ProductController {
                 category
         );
 
-        // Сохраняем товар в базу данных
+
         Product savedProduct = productRepository.save(newProduct);
 
-        // Возвращаем ответ 201 Created с созданным товаром
+
         return ResponseEntity.created(URI.create("/api/products/" + savedProduct.getId())).body(savedProduct);
     }
-    // -- КОНЕЦ ИЗМЕНЕНИЙ --
+    @GetMapping("/products/category/{categorySlug}")
+    public ResponseEntity<List<Product>> getProductsByCategorySlug(@PathVariable String categorySlug) {
+        List<Product> products = productRepository.findByCategorySlug(categorySlug);
+        if (products.isEmpty()) {
+
+            return ResponseEntity.ok(products);
+        }
+        return ResponseEntity.ok(products);
+    }
+
 }
