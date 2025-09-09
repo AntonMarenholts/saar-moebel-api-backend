@@ -20,24 +20,27 @@ public class NewsArticle {
 
     @Column(nullable = false)
     private String titleDe;
-    @Lob
+
+    // V-- ЗАМЕНА НАЧАЛАСЬ ЗДЕСЬ --V
+    @Column(columnDefinition = "TEXT")
     private String contentDe;
 
     private String titleEn;
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String contentEn;
 
     private String titleFr;
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String contentFr;
 
     private String titleRu;
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String contentRu;
 
     private String titleUk;
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String contentUk;
+    // ^-- ЗАМЕНА ЗАКОНЧИЛАСЬ ЗДЕСЬ --^
 
     private String imageUrl;
 

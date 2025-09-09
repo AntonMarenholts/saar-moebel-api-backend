@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-
+import java.time.LocalDateTime;
 import java.math.BigDecimal;
 
 @Entity
@@ -29,6 +29,9 @@ public class Product {
 
     private String imageUrl;
 
+    @Column(updatable = false)
+    private LocalDateTime createdAt;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private Category category;
@@ -39,5 +42,6 @@ public class Product {
         this.price = price;
         this.imageUrl = imageUrl;
         this.category = category;
+        this.createdAt = LocalDateTime.now();
     }
 }
