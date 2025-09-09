@@ -1,9 +1,10 @@
 package de.saarland.moebel.controller;
 
+import de.saarland.moebel.dto.NewsArticleRequest;
 import de.saarland.moebel.model.NewsArticle;
 import de.saarland.moebel.repository.NewsArticleRepository;
+import de.saarland.moebel.service.TranslationService;
 import jakarta.persistence.EntityNotFoundException;
-import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -17,12 +18,12 @@ import java.util.List;
 public class AdminNewsController {
 
     private final NewsArticleRepository newsRepository;
-    private final ModelMapper modelMapper;
+    private final TranslationService translationService;
 
 
-    public AdminNewsController(NewsArticleRepository newsRepository, ModelMapper modelMapper) {
+    public AdminNewsController(NewsArticleRepository newsRepository, TranslationService translationService) {
         this.newsRepository = newsRepository;
-        this.modelMapper = modelMapper;
+        this.translationService = translationService;
     }
 
     @GetMapping
@@ -31,18 +32,51 @@ public class AdminNewsController {
     }
 
     @PostMapping
-    public ResponseEntity<NewsArticle> createNews(@RequestBody NewsArticle newsArticle) {
-        NewsArticle savedArticle = newsRepository.save(newsArticle);
+    public ResponseEntity<NewsArticle> createNews(@RequestBody NewsArticleRequest request) {
+        NewsArticle article = new NewsArticle();
+        article.setTitleDe(request.getTitleDe());
+        article.setContentDe(request.getContentDe());
+        article.setImageUrl(request.getImageUrl());
+
+        // Автоматический перевод
+        article.setTitleEn(translationService.translate(request.getTitleDe(), "EN-US"));
+        article.setContentEn(translationService.translate(request.getContentDe(), "EN-US"));
+
+        article.setTitleFr(translationService.translate(request.getTitleDe(), "FR"));
+        article.setContentFr(translationService.translate(request.getContentDe(), "FR"));
+
+        article.setTitleRu(translationService.translate(request.getTitleDe(), "RU"));
+        article.setContentRu(translationService.translate(request.getContentDe(), "RU"));
+
+        article.setTitleUk(translationService.translate(request.getTitleDe(), "UK"));
+        article.setContentUk(translationService.translate(request.getContentDe(), "UK"));
+
+
+        NewsArticle savedArticle = newsRepository.save(article);
         return new ResponseEntity<>(savedArticle, HttpStatus.CREATED);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<NewsArticle> updateNews(@PathVariable Long id, @RequestBody NewsArticle newsDetails) {
+    public ResponseEntity<NewsArticle> updateNews(@PathVariable Long id, @RequestBody NewsArticleRequest request) {
         NewsArticle article = newsRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("News article not found with id: " + id));
 
+        article.setTitleDe(request.getTitleDe());
+        article.setContentDe(request.getContentDe());
+        article.setImageUrl(request.getImageUrl());
 
-        modelMapper.map(newsDetails, article);
+        // Автоматический перевод при обновлении
+        article.setTitleEn(translationService.translate(request.getTitleDe(), "EN-US"));
+        article.setContentEn(translationService.translate(request.getContentDe(), "EN-US"));
+
+        article.setTitleFr(translationService.translate(request.getTitleDe(), "FR"));
+        article.setContentFr(translationService.translate(request.getContentDe(), "FR"));
+
+        article.setTitleRu(translationService.translate(request.getTitleDe(), "RU"));
+        article.setContentRu(translationService.translate(request.getContentDe(), "RU"));
+
+        article.setTitleUk(translationService.translate(request.getTitleDe(), "UK"));
+        article.setContentUk(translationService.translate(request.getContentDe(), "UK"));
 
         NewsArticle updatedArticle = newsRepository.save(article);
         return ResponseEntity.ok(updatedArticle);
