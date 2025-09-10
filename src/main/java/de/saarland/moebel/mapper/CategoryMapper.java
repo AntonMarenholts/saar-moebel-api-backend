@@ -12,9 +12,16 @@ public class CategoryMapper {
 
         CategoryDto dto = new CategoryDto();
         dto.setId(category.getId());
-        dto.setName(category.getName());
         dto.setSlug(category.getSlug());
         dto.setImageUrl(category.getImageUrl());
+
+        // Маппинг всех названий
+        dto.setNameDe(category.getNameDe());
+        dto.setNameEn(category.getNameEn());
+        dto.setNameFr(category.getNameFr());
+        dto.setNameRu(category.getNameRu());
+        dto.setNameUk(category.getNameUk());
+
         return dto;
     }
 
@@ -23,9 +30,16 @@ public class CategoryMapper {
 
         Category category = new Category();
         category.setId(dto.getId());
-        category.setName(dto.getName());
         category.setSlug(dto.getSlug());
         category.setImageUrl(dto.getImageUrl());
+
+        // Маппинг всех названий
+        category.setNameDe(dto.getNameDe());
+        category.setNameEn(dto.getNameEn());
+        category.setNameFr(dto.getNameFr());
+        category.setNameRu(dto.getNameRu());
+        category.setNameUk(dto.getNameUk());
+
         return category;
     }
 }

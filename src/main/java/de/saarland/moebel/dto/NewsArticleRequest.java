@@ -7,13 +7,15 @@ import lombok.Setter;
 @Getter
 @Setter
 public class NewsArticleRequest {
-
-    @NotBlank(message = "Title (DE) cannot be blank")
-    private String titleDe;
-
-    @NotBlank(message = "Content (DE) cannot be blank")
-    private String contentDe;
-
-    @NotBlank(message = "Image URL cannot be blank")
-    private String imageUrl;
+    @NotBlank private String titleDe;
+    @NotBlank private String contentDe;
+    @NotBlank private String imageUrl;
+    @NotBlank private String titleEn;
+    @NotBlank private String contentEn;
+    @NotBlank private String titleFr;
+    @NotBlank private String contentFr;
+    @NotBlank private String titleRu;
+    @NotBlank private String contentRu;
+    @NotBlank private String titleUk;
+    @NotBlank private String contentUk;
 }

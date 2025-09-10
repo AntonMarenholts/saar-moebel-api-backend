@@ -11,9 +11,11 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
 
     Optional<Category> findBySlug(String slug);
 
-    Optional<Category> findByName(String name);
+    // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+    Optional<Category> findByNameDe(String nameDe);
 
-    Optional<Category> findByNameAndIdNot(String name, Long id);
+    Optional<Category> findByNameDeAndIdNot(String nameDe, Long id);
+    // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
     Optional<Category> findBySlugAndIdNot(String slug, Long id);
 }

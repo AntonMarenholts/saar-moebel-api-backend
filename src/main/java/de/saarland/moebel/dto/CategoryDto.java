@@ -9,12 +9,17 @@ import lombok.Setter;
 public class CategoryDto {
     private Long id;
 
-    @NotBlank(message = "Category name cannot be blank")
-    private String name;
+    @NotBlank(message = "Category name (DE) cannot be blank")
+    private String nameDe;
 
     @NotBlank(message = "Category slug cannot be blank")
     private String slug;
 
-
     private String imageUrl;
+
+    // Поля для других языков
+    private String nameEn;
+    private String nameFr;
+    private String nameRu;
+    private String nameUk;
 }
