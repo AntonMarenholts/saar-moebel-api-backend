@@ -2,9 +2,10 @@ package de.saarland.moebel.security;
 
 import de.saarland.moebel.security.jwt.AuthEntryPointJwt;
 import de.saarland.moebel.security.jwt.AuthTokenFilter;
-import de.saarland.moebel.security.jwt.JwtUtils; // <-- ДОБАВЛЕН ИМПОРТ
+import de.saarland.moebel.security.jwt.JwtUtils;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -32,22 +33,20 @@ public class WebSecurityConfig {
     private final AuthEntryPointJwt unauthorizedHandler;
     private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
     private final PasswordEncoder passwordEncoder;
-    private final JwtUtils jwtUtils; // <-- ДОБАВЛЕНО ПОЛЕ
+    private final JwtUtils jwtUtils;
 
-    // V-- AuthTokenFilter УБРАН ИЗ КОНСТРУКТОРА --V
     public WebSecurityConfig(UserDetailsService userDetailsService,
                              AuthEntryPointJwt unauthorizedHandler,
                              OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler,
                              PasswordEncoder passwordEncoder,
-                             JwtUtils jwtUtils) { // <-- JwtUtils ДОБАВЛЕН В КОНСТРУКТОР
+                             JwtUtils jwtUtils) {
         this.userDetailsService = userDetailsService;
         this.unauthorizedHandler = unauthorizedHandler;
         this.oAuth2LoginSuccessHandler = oAuth2LoginSuccessHandler;
         this.passwordEncoder = passwordEncoder;
-        this.jwtUtils = jwtUtils; // <-- ДОБАВЛЕНО ПОЛЕ
+        this.jwtUtils = jwtUtils;
     }
 
-    // V-- ДОБАВЛЕН ЯВНЫЙ БИН ДЛЯ ФИЛЬТРА --V
     @Bean
     public AuthTokenFilter authenticationJwtTokenFilter() {
         return new AuthTokenFilter(jwtUtils, userDetailsService);
@@ -66,7 +65,6 @@ public class WebSecurityConfig {
         return authConfig.getAuthenticationManager();
     }
 
-    // Метод corsConfigurationSource остается без изменений...
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
@@ -90,11 +88,19 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Админские маршруты требуют роль ADMIN
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Публичные GET-запросы
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/news/**").permitAll()
+
+                        // Аутентификация
                         .requestMatchers("/api/auth/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/categories/**").permitAll()
-                        .requestMatchers("/api/news/**").permitAll()
+
+                        // Загрузка файлов требует быть залогиненным
                         .requestMatchers("/api/upload/**").authenticated()
+
+                        // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
@@ -102,7 +108,6 @@ public class WebSecurityConfig {
                 );
 
         http.authenticationProvider(authenticationProvider());
-        // V-- ИСПОЛЬЗУЕМ МЕТОД ДЛЯ ПОЛУЧЕНИЯ ФИЛЬТРА --V
         http.addFilterBefore(authenticationJwtTokenFilter(), UsernamePasswordAuthenticationFilter.class);
 
         return http.build();

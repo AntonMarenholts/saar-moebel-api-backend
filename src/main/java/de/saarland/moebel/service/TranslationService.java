@@ -20,7 +20,9 @@ public class TranslationService {
             return text;
         }
         try {
-            TextResult result = translator.translateText(text, null, targetLang);
+            // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+            // Мы явно указываем исходный язык как "DE" (немецкий)
+            TextResult result = translator.translateText(text, "DE", targetLang);
             return result.getText();
         } catch (DeepLException | InterruptedException e) {
             // В реальном приложении здесь лучше логировать ошибку

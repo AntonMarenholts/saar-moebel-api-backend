@@ -1,16 +1,20 @@
 package de.saarland.moebel.controller;
 
 import de.saarland.moebel.dto.NewsArticleRequest;
+import de.saarland.moebel.dto.TranslationRequest;
+import de.saarland.moebel.dto.TranslationResponse;
 import de.saarland.moebel.model.NewsArticle;
 import de.saarland.moebel.repository.NewsArticleRepository;
 import de.saarland.moebel.service.TranslationService;
 import jakarta.persistence.EntityNotFoundException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/admin/news")
@@ -20,15 +24,32 @@ public class AdminNewsController {
     private final NewsArticleRepository newsRepository;
     private final TranslationService translationService;
 
-
     public AdminNewsController(NewsArticleRepository newsRepository, TranslationService translationService) {
         this.newsRepository = newsRepository;
         this.translationService = translationService;
     }
 
-    @GetMapping
-    public List<NewsArticle> getAllNews() {
-        return newsRepository.findAll();
+    @PostMapping("/translate")
+    public ResponseEntity<TranslationResponse> translateNews(@RequestBody TranslationRequest request) {
+        String titleEn = translationService.translate(request.getTitleDe(), "EN-US");
+        String contentEn = translationService.translate(request.getContentDe(), "EN-US");
+        String titleFr = translationService.translate(request.getTitleDe(), "FR");
+        String contentFr = translationService.translate(request.getContentDe(), "FR");
+        String titleRu = translationService.translate(request.getTitleDe(), "RU");
+        String contentRu = translationService.translate(request.getContentDe(), "RU");
+        String titleUk = translationService.translate(request.getTitleDe(), "UK");
+        String contentUk = translationService.translate(request.getContentDe(), "UK");
+
+        TranslationResponse response = new TranslationResponse(titleEn, contentEn, titleFr, contentFr, titleRu, contentRu, titleUk, contentUk);
+        return ResponseEntity.ok(response);
+    }
+
+    // Метод для получения новостей с пагинацией
+    @GetMapping("/all")
+    public Page<NewsArticle> getAllNews(
+            @PageableDefault(size = 6, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        return newsRepository.findAll(pageable);
     }
 
     @PostMapping
@@ -37,20 +58,14 @@ public class AdminNewsController {
         article.setTitleDe(request.getTitleDe());
         article.setContentDe(request.getContentDe());
         article.setImageUrl(request.getImageUrl());
-
-        // Автоматический перевод
-        article.setTitleEn(translationService.translate(request.getTitleDe(), "EN-US"));
-        article.setContentEn(translationService.translate(request.getContentDe(), "EN-US"));
-
-        article.setTitleFr(translationService.translate(request.getTitleDe(), "FR"));
-        article.setContentFr(translationService.translate(request.getContentDe(), "FR"));
-
-        article.setTitleRu(translationService.translate(request.getTitleDe(), "RU"));
-        article.setContentRu(translationService.translate(request.getContentDe(), "RU"));
-
-        article.setTitleUk(translationService.translate(request.getTitleDe(), "UK"));
-        article.setContentUk(translationService.translate(request.getContentDe(), "UK"));
-
+        article.setTitleEn(request.getTitleEn());
+        article.setContentEn(request.getContentEn());
+        article.setTitleFr(request.getTitleFr());
+        article.setContentFr(request.getContentFr());
+        article.setTitleRu(request.getTitleRu());
+        article.setContentRu(request.getContentRu());
+        article.setTitleUk(request.getTitleUk());
+        article.setContentUk(request.getContentUk());
 
         NewsArticle savedArticle = newsRepository.save(article);
         return new ResponseEntity<>(savedArticle, HttpStatus.CREATED);
@@ -64,19 +79,14 @@ public class AdminNewsController {
         article.setTitleDe(request.getTitleDe());
         article.setContentDe(request.getContentDe());
         article.setImageUrl(request.getImageUrl());
-
-        // Автоматический перевод при обновлении
-        article.setTitleEn(translationService.translate(request.getTitleDe(), "EN-US"));
-        article.setContentEn(translationService.translate(request.getContentDe(), "EN-US"));
-
-        article.setTitleFr(translationService.translate(request.getTitleDe(), "FR"));
-        article.setContentFr(translationService.translate(request.getContentDe(), "FR"));
-
-        article.setTitleRu(translationService.translate(request.getTitleDe(), "RU"));
-        article.setContentRu(translationService.translate(request.getContentDe(), "RU"));
-
-        article.setTitleUk(translationService.translate(request.getTitleDe(), "UK"));
-        article.setContentUk(translationService.translate(request.getContentDe(), "UK"));
+        article.setTitleEn(request.getTitleEn());
+        article.setContentEn(request.getContentEn());
+        article.setTitleFr(request.getTitleFr());
+        article.setContentFr(request.getContentFr());
+        article.setTitleRu(request.getTitleRu());
+        article.setContentRu(request.getContentRu());
+        article.setTitleUk(request.getTitleUk());
+        article.setContentUk(request.getContentUk());
 
         NewsArticle updatedArticle = newsRepository.save(article);
         return ResponseEntity.ok(updatedArticle);

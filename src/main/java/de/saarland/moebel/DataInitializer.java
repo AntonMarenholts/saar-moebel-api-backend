@@ -2,6 +2,7 @@ package de.saarland.moebel;
 
 import de.saarland.moebel.model.Category;
 import de.saarland.moebel.repository.CategoryRepository;
+import de.saarland.moebel.service.TranslationService; // Импортируем сервис
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -11,9 +12,11 @@ import java.util.List;
 public class DataInitializer implements CommandLineRunner {
 
     private final CategoryRepository categoryRepository;
+    private final TranslationService translationService; // Добавляем сервис
 
-    public DataInitializer(CategoryRepository categoryRepository) {
+    public DataInitializer(CategoryRepository categoryRepository, TranslationService translationService) {
         this.categoryRepository = categoryRepository;
+        this.translationService = translationService; // Инициализируем
     }
 
     @Override
@@ -22,20 +25,29 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println(">>>> Creating initial categories... <<<<");
 
             List<Category> initialCategories = List.of(
-                    new Category("Кухни", "kitchens"),
-                    new Category("Мебель для спальни", "bedroom_furniture"),
-                    new Category("Гостиные", "living_rooms"),
-                    new Category("Детская мебель", "children_furniture"),
-                    new Category("Мебель для прихожей", "hallways"),
-                    new Category("Офисная мебель", "office_furniture"),
-                    new Category("Садовая мебель", "garden_furniture"),
-                    new Category("Мебель для ванной", "bathroom_furniture"),
-                    new Category("Шкафы", "wardrobes"),
-                    new Category("Стулья", "chairs"),
-                    new Category("Обеденная мебель", "dining_furniture"),
-                    new Category("Кабинеты", "cabinets"),
-                    new Category("Мягкая мебель", "upholstered_furniture")
+                    new Category("Küchen", "kitchens"),
+                    new Category("Schlafzimmermöbel", "bedroom_furniture"),
+                    new Category("Wohnzimmer", "living_rooms"),
+                    new Category("Kindermöbel", "children_furniture"),
+                    new Category("Flurmöbel", "hallways"),
+                    new Category("Büromöbel", "office_furniture"),
+                    new Category("Gartenmöbel", "garden_furniture"),
+                    new Category("Badezimmermöbel", "bathroom_furniture"),
+                    new Category("Schränke", "wardrobes"),
+                    new Category("Stühle", "chairs"),
+                    new Category("Esszimmermöbel", "dining_furniture"),
+                    new Category("Kabinette", "cabinets"),
+                    new Category("Polstermöbel", "upholstered_furniture")
             );
+
+            // Переводим названия для каждой категории
+            for (Category category : initialCategories) {
+                String nameDe = category.getNameDe();
+                category.setNameEn(translationService.translate(nameDe, "EN-US"));
+                category.setNameFr(translationService.translate(nameDe, "FR"));
+                category.setNameRu(translationService.translate(nameDe, "RU"));
+                category.setNameUk(translationService.translate(nameDe, "UK"));
+            }
 
             categoryRepository.saveAll(initialCategories);
             System.out.println(">>>> " + initialCategories.size() + " categories created. <<<<");

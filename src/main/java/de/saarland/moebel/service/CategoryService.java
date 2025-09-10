@@ -22,10 +22,12 @@ public class CategoryService {
 
     @Transactional
     public Category createCategory(Category category) {
-
-        categoryRepository.findByName(category.getName()).ifPresent(c -> {
-            throw new ResourceConflictException("Category with name '" + c.getName() + "' already exists.");
+        // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+        categoryRepository.findByNameDe(category.getNameDe()).ifPresent(c -> {
+            throw new ResourceConflictException("Category with name '" + c.getNameDe() + "' already exists.");
         });
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
+
         categoryRepository.findBySlug(category.getSlug()).ifPresent(c -> {
             throw new ResourceConflictException("Category with slug '" + c.getSlug() + "' already exists.");
         });
@@ -38,18 +40,24 @@ public class CategoryService {
         Category category = categoryRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Category not found with id: " + id));
 
-
-        categoryRepository.findByNameAndIdNot(categoryDetails.getName(), id).ifPresent(c -> {
-            throw new ResourceConflictException("Category with name '" + c.getName() + "' already exists.");
+        // --- ИЗМЕНЕНИЯ ЗДЕСЬ ---
+        categoryRepository.findByNameDeAndIdNot(categoryDetails.getNameDe(), id).ifPresent(c -> {
+            throw new ResourceConflictException("Category with name '" + c.getNameDe() + "' already exists.");
         });
+        // --- КОНЕЦ ИЗМЕНЕНИЙ ---
 
         categoryRepository.findBySlugAndIdNot(categoryDetails.getSlug(), id).ifPresent(c -> {
             throw new ResourceConflictException("Category with slug '" + c.getSlug() + "' already exists.");
         });
 
-        category.setName(categoryDetails.getName());
+        category.setNameDe(categoryDetails.getNameDe());
         category.setSlug(categoryDetails.getSlug());
 
+        // Обновляем также переводы, если они переданы
+        category.setNameEn(categoryDetails.getNameEn());
+        category.setNameFr(categoryDetails.getNameFr());
+        category.setNameRu(categoryDetails.getNameRu());
+        category.setNameUk(categoryDetails.getNameUk());
 
         return categoryRepository.save(category);
     }
@@ -59,7 +67,6 @@ public class CategoryService {
         if (!categoryRepository.existsById(id)) {
             throw new EntityNotFoundException("Category not found with id: " + id);
         }
-
 
         if (productRepository.existsByCategoryId(id)) {
             throw new ResourceConflictException("Cannot delete category with id '" + id + "' because it contains products.");

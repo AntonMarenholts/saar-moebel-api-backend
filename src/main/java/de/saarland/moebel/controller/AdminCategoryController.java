@@ -4,6 +4,7 @@ import de.saarland.moebel.dto.CategoryDto;
 import de.saarland.moebel.mapper.CategoryMapper;
 import de.saarland.moebel.model.Category;
 import de.saarland.moebel.service.CategoryService;
+import de.saarland.moebel.service.TranslationService; // Импортируем сервис перевода
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,15 +19,24 @@ public class AdminCategoryController {
 
     private final CategoryService categoryService;
     private final CategoryMapper categoryMapper;
+    private final TranslationService translationService;
 
-    public AdminCategoryController(CategoryService categoryService, CategoryMapper categoryMapper) {
+    public AdminCategoryController(CategoryService categoryService, CategoryMapper categoryMapper, TranslationService translationService) {
         this.categoryService = categoryService;
         this.categoryMapper = categoryMapper;
+        this.translationService = translationService; // Инициализируем
     }
 
     @PostMapping
     public ResponseEntity<CategoryDto> createCategory(@Valid @RequestBody CategoryDto categoryDto) {
         Category category = categoryMapper.toEntity(categoryDto);
+
+        // Автоматически переводим название при создании
+        category.setNameEn(translationService.translate(category.getNameDe(), "EN-US"));
+        category.setNameFr(translationService.translate(category.getNameDe(), "FR"));
+        category.setNameRu(translationService.translate(category.getNameDe(), "RU"));
+        category.setNameUk(translationService.translate(category.getNameDe(), "UK"));
+
         Category savedCategory = categoryService.createCategory(category);
         return new ResponseEntity<>(categoryMapper.toDto(savedCategory), HttpStatus.CREATED);
     }
