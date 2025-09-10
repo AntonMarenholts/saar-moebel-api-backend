@@ -20,6 +20,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.Arrays;
 import java.util.List;
@@ -88,19 +89,13 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        // Админские маршруты требуют роль ADMIN
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // Публичные GET-запросы
-                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/news/**").permitAll()
+                        // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/news/**", "/api/promotions").permitAll()
 
-                        // Аутентификация
                         .requestMatchers("/api/auth/**", "/login/oauth2/**").permitAll()
-
-                        // Загрузка файлов требует быть залогиненным
                         .requestMatchers("/api/upload/**").authenticated()
-
-                        // Все остальные запросы требуют аутентификации
                         .anyRequest().authenticated()
                 )
                 .oauth2Login(oauth2 -> oauth2
