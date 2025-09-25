@@ -13,4 +13,8 @@ public interface PromotionRepository extends JpaRepository<Promotion, Long> {
 
     // Поиск активных акций для публичной страницы
     Page<Promotion> findByEndDateAfter(LocalDate date, Pageable pageable);
+
+    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
+    // Поиск завершенных акций для админки
+    Page<Promotion> findByEndDateBefore(LocalDate date, Pageable pageable);
 }

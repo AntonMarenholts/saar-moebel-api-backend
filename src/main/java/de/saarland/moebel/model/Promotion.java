@@ -18,7 +18,7 @@ public class Promotion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Поля для переводов
+
     @Column(nullable = false)
     private String nameDe;
     private String nameEn;
@@ -40,7 +40,11 @@ public class Promotion {
     @Column(nullable = false)
     private BigDecimal price;
 
-    private String size; // Опциональное поле
+
+    @Column
+    private BigDecimal oldPrice;
+
+    private String size;
 
     @Column(nullable = false)
     private String imageUrl;

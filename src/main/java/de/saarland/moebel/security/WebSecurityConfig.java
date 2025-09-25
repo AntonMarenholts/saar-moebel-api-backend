@@ -91,8 +91,8 @@ public class WebSecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/news/**", "/api/promotions").permitAll()
+
+                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/news/**", "/api/promotions/**").permitAll()
 
                         .requestMatchers("/api/auth/**", "/login/oauth2/**").permitAll()
                         .requestMatchers("/api/upload/**").authenticated()

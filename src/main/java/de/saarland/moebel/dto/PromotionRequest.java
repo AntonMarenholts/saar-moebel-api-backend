@@ -23,6 +23,10 @@ public class PromotionRequest {
     @Positive
     private BigDecimal price;
 
+
+    @Positive(message = "Old price must be positive")
+    private BigDecimal oldPrice; // Старая цена
+
     private String size;
 
     @NotBlank

@@ -8,6 +8,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -23,12 +24,20 @@ public class PromotionController {
         this.promotionRepository = promotionRepository;
     }
 
-    // Отдаем только активные акции, отсортированные по дате окончания
+
     @GetMapping
     public ResponseEntity<Page<Promotion>> getActivePromotions(
             @PageableDefault(size = 12, sort = "endDate", direction = Sort.Direction.ASC) Pageable pageable
     ) {
         Page<Promotion> activePromotions = promotionRepository.findByEndDateAfter(LocalDate.now(), pageable);
         return ResponseEntity.ok(activePromotions);
+    }
+
+
+    @GetMapping("/{id}")
+    public ResponseEntity<Promotion> getPromotionById(@PathVariable Long id) {
+        return promotionRepository.findById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }
