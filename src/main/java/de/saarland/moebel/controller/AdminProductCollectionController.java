@@ -18,6 +18,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.data.domain.Sort;
 import java.util.List;
+import de.saarland.moebel.dto.ProductCollectionUpdateRequest;
 
 @RestController
 @RequestMapping("/api/admin/collections")
@@ -64,6 +65,46 @@ public class AdminProductCollectionController {
         ProductCollection savedCollection = collectionRepository.save(collection);
         return new ResponseEntity<>(savedCollection, HttpStatus.CREATED);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ProductCollection> updateCollection(@PathVariable Long id, @Valid @RequestBody ProductCollectionUpdateRequest request) {
+        ProductCollection collection = collectionRepository.findById(id)
+                .orElseThrow(() -> new EntityNotFoundException("Collection not found with id: " + id));
+
+        // Проверка на уникальность slug, если он изменился
+        collectionRepository.findBySlug(request.getSlug()).ifPresent(existingCollection -> {
+            if (!existingCollection.getId().equals(id)) {
+                throw new ResourceConflictException("Collection with slug '" + request.getSlug() + "' already exists.");
+            }
+        });
+
+        Category category = categoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new EntityNotFoundException("Category not found"));
+
+        collection.setNameDe(request.getNameDe());
+        collection.setSlug(request.getSlug());
+        collection.setDescriptionDe(request.getDescriptionDe());
+        collection.setCategory(category);
+
+        // Обновляем URL изображения, только если он был предоставлен
+        if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
+            collection.setImageUrl(request.getImageUrl());
+        }
+
+        // Повторный перевод для обновления всех полей
+        collection.setNameEn(translationService.translate(request.getNameDe(), "EN-US"));
+        collection.setDescriptionEn(translationService.translate(request.getDescriptionDe(), "EN-US"));
+        collection.setNameFr(translationService.translate(request.getNameDe(), "FR"));
+        collection.setDescriptionFr(translationService.translate(request.getDescriptionDe(), "FR"));
+        collection.setNameRu(translationService.translate(request.getNameDe(), "RU"));
+        collection.setDescriptionRu(translationService.translate(request.getDescriptionDe(), "RU"));
+        collection.setNameUk(translationService.translate(request.getNameDe(), "UK"));
+        collection.setDescriptionUk(translationService.translate(request.getDescriptionDe(), "UK"));
+
+        ProductCollection updatedCollection = collectionRepository.save(collection);
+        return ResponseEntity.ok(updatedCollection);
+    }
+
 
     @PostMapping("/elements")
     public ResponseEntity<Product> addProductToCollection(@Valid @RequestBody ProductElementRequest request) {
