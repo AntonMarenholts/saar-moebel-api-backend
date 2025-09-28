@@ -89,14 +89,23 @@ public class WebSecurityConfig {
                 .exceptionHandling(exception -> exception.authenticationEntryPoint(unauthorizedHandler))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
+                                .requestMatchers(HttpMethod.GET,
+                                        "/api/categories/**",
+                                        "/api/collections/**",
+                                        "/api/products/**",
+                                        "/api/news/**",
+                                        "/api/promotions/**"
+                                ).permitAll()
 
-                        .requestMatchers(HttpMethod.GET, "/api/products/**", "/api/categories/**", "/api/news/**", "/api/promotions/**").permitAll()
+                                .requestMatchers("/api/auth/**", "/login/oauth2/**").permitAll()
 
-                        .requestMatchers("/api/auth/**", "/login/oauth2/**").permitAll()
-                        .requestMatchers("/api/upload/**").authenticated()
-                        .anyRequest().authenticated()
+                                .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                                .requestMatchers("/api/upload/**").authenticated()
+
+                                .anyRequest().authenticated()
+
                 )
                 .oauth2Login(oauth2 -> oauth2
                         .successHandler(oAuth2LoginSuccessHandler)

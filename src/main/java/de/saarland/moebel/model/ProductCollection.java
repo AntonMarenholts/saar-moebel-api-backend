@@ -1,32 +1,27 @@
 package de.saarland.moebel.model;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
-import java.math.BigDecimal;
+
+import java.util.List;
 
 @Entity
-@Table(name = "products")
+@Table(name = "product_collections")
 @Getter
 @Setter
-@NoArgsConstructor
-public class Product {
+public class ProductCollection {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-    // Добавляем поле для соответствия столбцу 'name' в БД
-    @Column(name = "name", nullable = false)
-    private String name;
+    @Column(nullable = false, unique = true)
+    private String slug;
 
-    // Это поле будет соответствовать столбцу 'name_de' в БД
-    @Column(name = "name_de", nullable = false)
+    @Column(nullable = false)
     private String nameDe;
-
     private String nameEn;
     private String nameFr;
     private String nameRu;
@@ -43,13 +38,13 @@ public class Product {
     @Column(columnDefinition = "TEXT")
     private String descriptionUk;
 
-    @Column(nullable = false)
-    private BigDecimal price;
-
     private String imageUrl;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "collection_id")
-    @JsonBackReference
-    private ProductCollection collection;
+    @ManyToOne
+    @JoinColumn(name = "category_id")
+    private Category category;
+
+    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonManagedReference
+    private List<Product> products;
 }
