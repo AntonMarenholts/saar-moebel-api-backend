@@ -71,7 +71,6 @@ public class AdminProductCollectionController {
         ProductCollection collection = collectionRepository.findById(id)
                 .orElseThrow(() -> new EntityNotFoundException("Collection not found with id: " + id));
 
-        // Проверка на уникальность slug, если он изменился
         collectionRepository.findBySlug(request.getSlug()).ifPresent(existingCollection -> {
             if (!existingCollection.getId().equals(id)) {
                 throw new ResourceConflictException("Collection with slug '" + request.getSlug() + "' already exists.");
@@ -86,12 +85,10 @@ public class AdminProductCollectionController {
         collection.setDescriptionDe(request.getDescriptionDe());
         collection.setCategory(category);
 
-        // Обновляем URL изображения, только если он был предоставлен
         if (request.getImageUrl() != null && !request.getImageUrl().isBlank()) {
             collection.setImageUrl(request.getImageUrl());
         }
 
-        // Повторный перевод для обновления всех полей
         collection.setNameEn(translationService.translate(request.getNameDe(), "EN-US"));
         collection.setDescriptionEn(translationService.translate(request.getDescriptionDe(), "EN-US"));
         collection.setNameFr(translationService.translate(request.getNameDe(), "FR"));
@@ -113,8 +110,7 @@ public class AdminProductCollectionController {
 
         Product product = new Product();
 
-        // --- ИЗМЕНЕНИЕ ЗДЕСЬ ---
-        // Заполняем оба поля из одного источника
+
         product.setName(request.getNameDe());
         product.setNameDe(request.getNameDe());
 
